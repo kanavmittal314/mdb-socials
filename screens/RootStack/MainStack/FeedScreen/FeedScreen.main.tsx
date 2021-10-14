@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, FlatList } from "react-native";
-import { Appbar, Card } from "react-native-paper";
+import { View, FlatList, TouchableOpacity, Text, ListRenderItem } from "react-native";
+import { Appbar, Card, Paragraph, Title, Button, Subheading } from "react-native-paper";
 import firebase from "firebase/app";
 import "firebase/firestore";
 import { SocialModel } from "../../../../models/social.js";
 import { styles } from "./FeedScreen.styles";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MainStackParamList } from "../MainStackScreen.js";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 /* HOW TYPESCRIPT WORKS WITH PROPS:
 
@@ -27,6 +28,8 @@ interface Props {
 export default function FeedScreen({ navigation }: Props) {
   // TODO: Initialize a list of SocialModel objects in state.
 
+  const [socialModelList, setSocialModelList] = useState<SocialModel[]>([]);
+  
   /* TYPESCRIPT HINT: 
     When we call useState(), we can define the type of the state
     variable using something like this:
@@ -45,27 +48,66 @@ export default function FeedScreen({ navigation }: Props) {
       3. You'll probably want to use the .orderBy method to order by a particular key.
       4. It's probably wise to make sure you can create new socials before trying to 
           load socials on this screen.
+
   */
+
+  useEffect(() => {
+    let listener = firebase.firestore().collection("socials").onSnapshot((querySnapshot) => {
+      let socials : SocialModel[] = []
+      querySnapshot.forEach((doc) => {
+        let data = doc.data()
+        socials.push({
+          id: doc.id,
+          eventDate: data.eventDate,
+          eventDescription: data.eventDescription,
+          eventImage: data.eventImage,
+          eventLocation: data.eventLocation,
+          eventName: data.eventName,
+        } as SocialModel)
+      });
+      setSocialModelList(socials);
+    });
+    return listener;
+  }, []);
+
+
 
   const renderItem = ({ item }: { item: SocialModel }) => {
     // TODO: Return a Card corresponding to the social object passed in
     // to this function. On tapping this card, navigate to DetailScreen
     // and pass this social.
-
-    return null;
+    return (
+    <Card onPress={() => navigation.navigate('DetailScreen', {social: item})}>
+      <Card.Cover source = {{uri: item.eventImage}}/>
+      <Card.Content>
+        <Title>{item.eventName}</Title>
+        <Subheading>{item.eventLocation + " • " + new Date(item.eventDate).toLocaleDateString() + ", " + new Date(item.eventDate).toLocaleTimeString()}</Subheading>
+      </Card.Content>
+    </Card>)
   };
 
   const NavigationBar = () => {
     // TODO: Return an AppBar, with a title & a Plus Action Item that goes to the NewSocialScreen.
-    return null;
+    return (
+      
+      <Appbar.Header>
+        <Appbar.Content title="Socials" />
+        <Appbar.Action
+          icon="plus"
+          onPress={() => navigation.navigate("NewSocialScreen")}
+        ></Appbar.Action>
+      </Appbar.Header>
+      
+    );
   };
 
   return (
-    <>
-      {/* Embed your NavigationBar here. */}
-      <View style={styles.container}>
-        {/* Return a FlatList here. You'll need to use your renderItem method. */}
-      </View>
-    </>
+    <SafeAreaView style={styles.container}>
+      <NavigationBar/>
+      <FlatList
+        data={socialModelList}
+        renderItem={renderItem}
+      />
+    </SafeAreaView>
   );
 }

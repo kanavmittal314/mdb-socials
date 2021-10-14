@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function DetailScreen({ route, navigation }: Props) {
-  const { social } = route.params;
+  const item = route.params.social;
 
   const Bar = () => {
     return (
@@ -28,17 +28,17 @@ export default function DetailScreen({ route, navigation }: Props) {
       <Bar />
       <ScrollView style={styles.container}>
         <View style={styles.view}>
-          <Image style={styles.image} source={{ uri: social.eventImage }} />
+          <Image style={styles.image} source={{ uri: item.eventImage }} />
           <Text style={{ ...styles.h1, marginVertical: 10 }}>
-            {social.eventName}
+            {item.eventName}
           </Text>
           <Text style={{ ...styles.subtitle, marginBottom: 5 }}>
-            {social.eventLocation}
+            {item.eventLocation}
           </Text>
           <Text style={{ ...styles.subtitle, marginTop: 5, marginBottom: 20 }}>
-            {new Date(social.eventDate).toLocaleString()}
+            {new Date(item.eventDate).toLocaleString()}
           </Text>
-          <Text style={styles.body}>{social.eventDescription}</Text>
+          <Text style={styles.body}>{item.eventDescription}</Text>
         </View>
       </ScrollView>
     </>

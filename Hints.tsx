@@ -65,7 +65,7 @@ const regularNetworkRequests = () => {
 };
 
 // This is the clean, new way of doing things
-const asyncAwaitNetworkRequests = async () => {
+export const asyncAwaitNetworkRequests = async () => {
   const object = await getFileObjectAsync(eventImage);
   const result = await firebase
     .storage()
